@@ -1,0 +1,46 @@
+{
+  "name": "paid-ai-seller-api",
+  "version": "1.0.0",
+  "description": "Express API that sells AI responses using x402 payments on Base Sepolia.",
+  "main": "dist/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test:buyer": "tsx scripts/test-buyer.ts",
+    "test:topup-buy": "tsx scripts/top-up-and-buy.ts",
+    "check:venice": "tsx scripts/check-venice-models.ts",
+    "check:venice:chat": "tsx scripts/check-venice-chat.ts"
+  },
+  "keywords": [
+    "x402",
+    "express",
+    "ai",
+    "payments",
+    "coinbase",
+    "typescript"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@coinbase/x402": "^2.1.0",
+    "@x402/core": "^2.11.0",
+    "@x402/evm": "^2.11.0",
+    "@x402/express": "latest",
+    "@x402/extensions": "^2.11.0",
+    "better-sqlite3": "^12.9.0",
+    "dotenv": "latest",
+    "express": "latest",
+    "openai": "latest",
+    "viem": "^2.48.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "latest",
+    "@types/node": "latest",
+    "rimraf": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
