@@ -16,6 +16,7 @@ import { serviceDescriptions } from "./descriptions";
 import { estimateAuthorizationPriceUsd } from "./model-pricing";
 
 const INFERENCE_ROUTE_PATHS = new Set(["/v1/responses", "/v1/chat/completions"]);
+const PUBLIC_API_BASE_URL = `https://${serviceDescriptions.serviceDomain}`;
 
 function createFacilitatorClient(): HTTPFacilitatorClient {
   const isCdpFacilitator = env.x402FacilitatorUrl.includes("api.cdp.coinbase.com");
@@ -297,6 +298,7 @@ function wrapInferenceProcess(httpServer: x402HTTPResourceServer): void {
 
 function createResponsesRouteConfig(): RouteConfig {
   return {
+    resource: `${PUBLIC_API_BASE_URL}/v1/responses`,
     accepts: [
       {
         scheme: "upto",
@@ -374,6 +376,7 @@ function createResponsesRouteConfig(): RouteConfig {
 
 function createChatCompletionsRouteConfig(): RouteConfig {
   return {
+    resource: `${PUBLIC_API_BASE_URL}/v1/chat/completions`,
     accepts: [
       {
         scheme: "upto",
