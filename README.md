@@ -1,6 +1,6 @@
 # Paid AI Seller API
 
-TypeScript Express server that sells OpenAI-compatible inference behind `x402` on Base Sepolia.
+TypeScript Express server that sells OpenAI-compatible inference behind `x402` on Base mainnet.
 
 ## What this repo is
 
@@ -33,10 +33,10 @@ That is the flow exercised by [scripts/test-buyer.ts](/e:/bizwax/Testing/ai-mode
 
 ## Current network and payment mode
 
-- network: `eip155:84532` Base Sepolia
-- facilitator default: `https://x402.org/facilitator`
-- payment scheme: `exact`
-- default price: `$0.01`
+- network: `eip155:8453` Base mainnet
+- facilitator default: `https://api.cdp.coinbase.com/platform/v2/x402`
+- payment scheme: `upto`
+- pricing: usage-settled with a minimum of `$0.001` and a maximum request cap of `$6`
 
 The x402 metadata is registered in [src/x402.ts](/e:/bizwax/Testing/ai-model/src/x402.ts).
 
@@ -47,9 +47,10 @@ Copy [`.env.example`](/e:/bizwax/Testing/ai-model/.env.example) to [`.env`](/e:/
 ### Seller-side x402 values
 
 - `PAY_TO_ADDRESS`
-- `X402_NETWORK=eip155:84532`
-- `X402_FACILITATOR_URL=https://x402.org/facilitator`
-- `X402_PRICE_USD=$0.01`
+- `X402_NETWORK=eip155:8453`
+- `X402_FACILITATOR_URL=https://api.cdp.coinbase.com/platform/v2/x402`
+- `CDP_API_KEY_ID`
+- `CDP_API_KEY_SECRET`
 
 ### Seller-side provider values
 
@@ -77,15 +78,9 @@ Compatibility fallbacks currently accepted by [src/config/env.ts](/e:/bizwax/Tes
 ### Buyer test values
 
 - `BUYER_PRIVATE_KEY`
-- `BUYER_RPC_URL` optional, defaults to `https://sepolia.base.org`
-- `BUYER_TARGET_URL` optional, defaults to `http://localhost:4021/v1/responses`
+- `BUYER_RPC_URL` optional, defaults to `https://mainnet.base.org`
+- `BUYER_TARGET_URL` optional, defaults to `https://api.zeno.finance/v1/responses`
 - `BUYER_PROMPT` optional
-
-### Venice direct-check values
-
-- `VENICE_API_KEY` for `npm run check:venice:chat`
-- `VENICE_MODEL` optional
-- `VENICE_PROMPT` optional
 
 ## Install and run
 
@@ -174,32 +169,13 @@ npm run test:buyer
 
 That script:
 
-1. calls your local paid endpoint with no payment
+1. calls your configured paid endpoint with no payment
 2. expects `402 Payment Required`
 3. builds and signs the x402 payment payload from `BUYER_PRIVATE_KEY`
 4. retries the same request with payment headers
 5. prints the final response
 
-If you want to verify the actual purchase path in this repo, this is the script to use.
-
-## Venice scripts
-
-Run:
-
-```bash
-npm run check:venice
-npm run check:venice:chat
-```
-
-Important distinction:
-
-- `scripts/test-buyer.ts` tests **this repo's x402 purchase flow**
-- `scripts/check-venice-chat.ts` does **not** test this repo's buyer flow
-- `scripts/check-venice-chat.ts` sends a direct bearer-token request to Venice using `VENICE_API_KEY`
-
-So even if you are comparing against Venice's x402 story, the script in this repo is still using their provider API key path. That means it can still hit Venice directly and may still incur provider-side usage charges. It is a comparison/probe script, not the local x402 buy test.
-
-If you want "just like the test buy", use `npm run test:buyer`, not the Venice chat checker.
+By default it targets the live endpoint at `https://api.zeno.finance/v1/responses`. Set `BUYER_TARGET_URL` if you want to point it at a local or alternate deployment instead.
 
 ## Bazaar discovery metadata
 
@@ -219,5 +195,4 @@ The metadata includes:
 
 - Keep `.env` private.
 - Do not commit real API keys or private keys.
-- The repo is currently testnet-first.
-- `CDP_API_KEY_ID` and `CDP_API_KEY_SECRET` are loaded in env, but the current server path is still configured around `https://x402.org/facilitator`.
+- This repo is currently configured for Base mainnet with the CDP facilitator.

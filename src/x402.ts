@@ -171,9 +171,28 @@ function logExtensionResponses(
   headers: Record<string, string>,
 ): void {
   const headerValue = getHeaderIgnoreCase(headers, "extension-responses");
-  const decoded = decodeExtensionResponsesHeader(headerValue);
+  if (!headerValue) {
+    console.info("x402 extension responses", {
+      phase,
+      method: context.method,
+      path: context.path,
+      routePattern: context.routePattern,
+      headerPresent: false,
+    });
+    return;
+  }
 
+  const decoded = decodeExtensionResponsesHeader(headerValue);
   if (!decoded || decoded.length === 0) {
+    console.info("x402 extension responses", {
+      phase,
+      method: context.method,
+      path: context.path,
+      routePattern: context.routePattern,
+      headerPresent: true,
+      parseable: false,
+      rawHeader: headerValue,
+    });
     return;
   }
 
@@ -182,6 +201,8 @@ function logExtensionResponses(
     method: context.method,
     path: context.path,
     routePattern: context.routePattern,
+    headerPresent: true,
+    parseable: true,
     responses: decoded,
   });
 }

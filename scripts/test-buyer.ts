@@ -22,6 +22,10 @@ type PaymentRequiredShape = {
   }>;
 };
 
+function normalizeAddress(value: string | undefined): string {
+  return (value || "").trim().toLowerCase();
+}
+
 const PERMIT2_ADDRESS = "0x000000000022D473030F116dDEE9F6B43aC78BA3" as const;
 const ERC20_READ_ABI = [
   {
@@ -180,7 +184,7 @@ async function inspectTokenState(input: {
 
 async function main(): Promise<void> {
   const buyerPrivateKey = requireEnv("BUYER_PRIVATE_KEY") as `0x${string}`;
-  const targetUrl = process.env.BUYER_TARGET_URL?.trim() || "http://localhost:4021/v1/responses";
+  const targetUrl = process.env.BUYER_TARGET_URL?.trim() || "https://api.zeno.finance/v1/responses";
   const prompt = process.env.BUYER_PROMPT?.trim() || "What is 2+2?";
   const buyerModel = process.env.BUYER_MODEL?.trim() || "server-default";
   const network = getNetwork();
@@ -206,6 +210,22 @@ async function main(): Promise<void> {
 
   if (initialResponse.status !== 402) {
     printPaidResponse(initialText);
+    return;
+  }
+
+  const initialPaymentRequired = decodePaymentRequired(initialResponse.headers.get("payment-required"));
+  const initialAccept = initialPaymentRequired?.accepts?.[0];
+  if (normalizeAddress(initialAccept?.payTo) === normalizeAddress(account.address)) {
+    console.error("Buyer test failed");
+    console.error(
+      [
+        "The buyer wallet and payTo wallet are the same address.",
+        `Buyer address: ${account.address}`,
+        `payTo address: ${initialAccept?.payTo}`,
+        "Use a different BUYER_PRIVATE_KEY than the merchant PAY_TO_ADDRESS, then retry.",
+      ].join("\n"),
+    );
+    process.exitCode = 1;
     return;
   }
 
