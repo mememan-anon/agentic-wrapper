@@ -17,7 +17,8 @@
     "pm2:logs": "pm2 logs api-zeno-finance",
     "pm2:status": "pm2 status api-zeno-finance",
     "approve:permit2": "tsx scripts/approve-permit2.ts",
-    "test:buyer": "tsx scripts/test-buyer.ts"
+    "test:buyer": "tsx scripts/test-buyer.ts",
+    "debug:verify": "tsx scripts/debug-verify.ts"
   },
   "keywords": [
     "x402",
