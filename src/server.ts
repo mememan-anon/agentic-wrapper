@@ -16,6 +16,7 @@ app.get("/", (_req, res) => {
   res.json({
     ok: true,
     service: serviceDescriptions.serviceName,
+    domain: serviceDescriptions.serviceDomain,
     overview: serviceDescriptions.serviceOverview,
     tagline: serviceDescriptions.marketplaceTagline,
     use_cases: serviceDescriptions.marketplaceUseCases,
@@ -53,7 +54,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 app.listen(env.port, () => {
-  console.log(`api.zeno.finance API listening on http://localhost:${env.port}`);
+  console.log(`${serviceDescriptions.serviceName} API listening on http://localhost:${env.port}`);
   console.log(`x402 network: ${env.x402Network}`);
   console.log("Paid routes: POST /v1/chat/completions and POST /v1/responses");
 });

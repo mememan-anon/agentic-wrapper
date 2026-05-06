@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import { setSettlementOverrides } from "@x402/express";
 
 import { env } from "../config/env";
+import { serviceDescriptions } from "../descriptions";
 import {
   calculateUsagePriceUsd,
   estimateAuthorizationPriceUsd,
@@ -30,6 +31,8 @@ type MessageLike = {
 
 type SimplifiedResponsesPayload = {
   output_text: string;
+  tokens_spent: number;
+  cost_usd: number;
 };
 
 type ChatCompletionCompatPayload = {
@@ -45,7 +48,8 @@ type ChatCompletionCompatPayload = {
     };
     finish_reason: string | null;
   }>;
-  usage?: unknown;
+  tokens_spent: number;
+  cost_usd: number;
 };
 
 const client = new OpenAI({
@@ -63,7 +67,8 @@ export const generateRouter = Router();
 generateRouter.get("/models", (_req: Request, res: Response) => {
   res.json({
     object: "list",
-    service: "api.zeno.finance",
+    service: serviceDescriptions.serviceName,
+    domain: serviceDescriptions.serviceDomain,
     overview: "OpenAI-compatible wallet-paid inference for agentic reasoning, summarization, and structured generation.",
     payment: {
       protocol: "x402",
@@ -186,6 +191,8 @@ function createChatCompletionCompatResponse(
   response: Record<string, unknown>,
   model: string,
   outputText: string,
+  tokensSpent: number,
+  costUsd: number,
 ): ChatCompletionCompatPayload {
   return {
     id: typeof response.id === "string" ? response.id : `chatcmpl-${Date.now()}`,
@@ -202,8 +209,21 @@ function createChatCompletionCompatResponse(
         finish_reason: "stop",
       },
     ],
-    ...(response.usage ? { usage: response.usage } : {}),
+    tokens_spent: tokensSpent,
+    cost_usd: costUsd,
   };
+}
+
+function extractTokensSpent(response: Record<string, unknown>): number {
+  const usage = response.usage;
+  const typedUsage = usage && typeof usage === "object" ? (usage as Record<string, unknown>) : {};
+  const inputTokens =
+    (typeof typedUsage.input_tokens === "number" ? typedUsage.input_tokens : 0) ||
+    (typeof typedUsage.prompt_tokens === "number" ? typedUsage.prompt_tokens : 0);
+  const outputTokens =
+    (typeof typedUsage.output_tokens === "number" ? typedUsage.output_tokens : 0) ||
+    (typeof typedUsage.completion_tokens === "number" ? typedUsage.completion_tokens : 0);
+  return inputTokens + outputTokens;
 }
 
 generateRouter.post(
@@ -250,12 +270,13 @@ generateRouter.post(
       const response = await client.responses.create(requestBody as never);
       const serializedResponse = response as unknown as Record<string, unknown>;
       const outputText = extractResponseOutputText(serializedResponse);
+      const tokensSpent = extractTokensSpent(serializedResponse);
       const authorizedPriceUsd = estimateAuthorizationPriceUsd(selectedModel, req.body);
       const settledPriceUsd = Math.min(calculateUsagePriceUsd(selectedModel, serializedResponse), authorizedPriceUsd);
       setSettlementOverrides(res, { amount: formatUsdPrice(settledPriceUsd) });
       res.setHeader("X-Zeno-Charged-Usd", formatUsdPrice(settledPriceUsd));
 
-      res.json(createChatCompletionCompatResponse(serializedResponse, selectedModel, outputText));
+      res.json(createChatCompletionCompatResponse(serializedResponse, selectedModel, outputText, tokensSpent, settledPriceUsd));
     } catch (error) {
       const typedError = error as ErrorWithStatus;
       if (typedError && typeof typedError === "object" && Number(typedError.status) >= 400) {
@@ -313,6 +334,7 @@ generateRouter.post(
 
       const serializedResponse = response as unknown as Record<string, unknown>;
       const outputText = extractResponseOutputText(serializedResponse);
+      const tokensSpent = extractTokensSpent(serializedResponse);
       const authorizedPriceUsd = estimateAuthorizationPriceUsd(selectedModel, req.body);
       const settledPriceUsd = Math.min(calculateUsagePriceUsd(selectedModel, serializedResponse), authorizedPriceUsd);
       setSettlementOverrides(res, { amount: formatUsdPrice(settledPriceUsd) });
@@ -320,6 +342,8 @@ generateRouter.post(
 
       const simplifiedResponse: SimplifiedResponsesPayload = {
         output_text: outputText,
+        tokens_spent: tokensSpent,
+        cost_usd: settledPriceUsd,
       };
 
       res.json(simplifiedResponse);

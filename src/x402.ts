@@ -350,6 +350,8 @@ function createResponsesRouteConfig(): RouteConfig {
           example: {
             output_text:
               "1. Softer inflation data lifted US equities at the open.\n2. Treasury yields eased across the curve.\n3. Mega-cap tech outperformed on AI infrastructure demand.",
+            tokens_spent: 190,
+            cost_usd: 0.001,
           },
           schema: {
             type: "object",
@@ -358,8 +360,10 @@ function createResponsesRouteConfig(): RouteConfig {
                 type: "string",
                 description: "Plain-text model output returned by api.zeno.finance.",
               },
+              tokens_spent: { type: "number" },
+              cost_usd: { type: "number" },
             },
-            required: ["output_text"],
+            required: ["output_text", "tokens_spent", "cost_usd"],
             additionalProperties: false,
           },
         },
@@ -450,6 +454,8 @@ function createChatCompletionsRouteConfig(): RouteConfig {
                 finish_reason: "stop",
               },
             ],
+            tokens_spent: 154,
+            cost_usd: 0.001,
           },
           schema: {
             type: "object",
@@ -479,8 +485,10 @@ function createChatCompletionsRouteConfig(): RouteConfig {
                   additionalProperties: false,
                 },
               },
+              tokens_spent: { type: "number" },
+              cost_usd: { type: "number" },
             },
-            required: ["id", "object", "created", "model", "choices"],
+            required: ["id", "object", "created", "model", "choices", "tokens_spent", "cost_usd"],
             additionalProperties: true,
           },
         },

@@ -185,7 +185,7 @@ async function inspectTokenState(input: {
 async function main(): Promise<void> {
   const buyerPrivateKey = requireEnv("BUYER_PRIVATE_KEY") as `0x${string}`;
   const targetUrl = process.env.BUYER_TARGET_URL?.trim() || "https://api.zeno.finance/v1/responses";
-  const prompt = process.env.BUYER_PROMPT?.trim() || "What is 2+2?";
+  const prompt = process.env.BUYER_PROMPT?.trim() || "Who is the president of kenya and how do we go to the moon?";
   const buyerModel = process.env.BUYER_MODEL?.trim() || "server-default";
   const network = getNetwork();
   const rpcUrl = getRpcUrl(network);
