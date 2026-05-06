@@ -324,7 +324,6 @@ function createResponsesRouteConfig(): RouteConfig {
           max_output_tokens: 256,
         },
         inputSchema: {
-          type: "object",
           properties: {
             model: {
               type: "string",
@@ -345,7 +344,6 @@ function createResponsesRouteConfig(): RouteConfig {
             },
           },
           required: ["input"],
-          additionalProperties: true,
         },
         bodyType: "json",
         output: {
@@ -354,19 +352,6 @@ function createResponsesRouteConfig(): RouteConfig {
               "1. Softer inflation data lifted US equities at the open.\n2. Treasury yields eased across the curve.\n3. Mega-cap tech outperformed on AI infrastructure demand.",
             tokens_spent: 190,
             cost_usd: 0.001,
-          },
-          schema: {
-            type: "object",
-            properties: {
-              output_text: {
-                type: "string",
-                description: "Plain-text model output returned by api.zeno.finance.",
-              },
-              tokens_spent: { type: "number" },
-              cost_usd: { type: "number" },
-            },
-            required: ["output_text", "tokens_spent", "cost_usd"],
-            additionalProperties: false,
           },
         },
       }),
@@ -406,7 +391,6 @@ function createChatCompletionsRouteConfig(): RouteConfig {
           max_tokens: 180,
         },
         inputSchema: {
-          type: "object",
           properties: {
             model: {
               type: "string",
@@ -459,40 +443,6 @@ function createChatCompletionsRouteConfig(): RouteConfig {
             ],
             tokens_spent: 154,
             cost_usd: 0.001,
-          },
-          schema: {
-            type: "object",
-            properties: {
-              id: { type: "string" },
-              object: { type: "string" },
-              created: { type: "number" },
-              model: { type: "string" },
-              choices: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    index: { type: "number" },
-                    message: {
-                      type: "object",
-                      properties: {
-                        role: { type: "string" },
-                        content: { type: "string" },
-                      },
-                      required: ["role", "content"],
-                      additionalProperties: false,
-                    },
-                    finish_reason: { type: ["string", "null"] },
-                  },
-                  required: ["index", "message"],
-                  additionalProperties: false,
-                },
-              },
-              tokens_spent: { type: "number" },
-              cost_usd: { type: "number" },
-            },
-            required: ["id", "object", "created", "model", "choices", "tokens_spent", "cost_usd"],
-            additionalProperties: true,
           },
         },
       }),
