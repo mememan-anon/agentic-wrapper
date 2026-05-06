@@ -44,6 +44,24 @@ function readPositiveNumber(keys: string[], fallback: number): number {
   return parsed;
 }
 
+function readBoolean(keys: string[], fallback: boolean): boolean {
+  const value = readFirstDefined(keys);
+  if (!value) {
+    return fallback;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) {
+    return true;
+  }
+
+  if (["0", "false", "no", "off"].includes(normalized)) {
+    return false;
+  }
+
+  throw new Error(`Expected a boolean value for one of: ${keys.join(", ")}`);
+}
+
 function readStringList(keys: string[], fallback: string[] = []): string[] {
   const value = readFirstDefined(keys);
   const parsed = value
@@ -106,6 +124,7 @@ export interface AppEnv {
   cdpApiKeyId: string;
   cdpApiKeySecret: string;
   fallbackRequestCostUsd: number;
+  x402EnableBazaar: boolean;
 }
 
 export const env: AppEnv = {
@@ -137,6 +156,7 @@ export const env: AppEnv = {
     ["X402_FALLBACK_PRICE_USD", "REQUEST_COST_USD"],
     0.1,
   ),
+  x402EnableBazaar: readBoolean(["X402_ENABLE_BAZAAR"], true),
 };
 
 env.openaiModels = Array.from(

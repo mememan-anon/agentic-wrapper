@@ -314,48 +314,52 @@ function createResponsesRouteConfig(): RouteConfig {
     mimeType: "application/json",
     unpaidResponseBody: createUnpaidResponseBody,
     settlementFailedResponseBody: createSettlementFailedResponseBody,
-    extensions: {
-      ...declareDiscoveryExtension({
-        input: {
-          model: env.openaiModel,
-          input:
-            "Extract the three most important market-moving events from this note and return a concise agent-ready summary.",
-          instructions: "Return plain text with one short line per event.",
-          max_output_tokens: 256,
-        },
-        inputSchema: {
-          properties: {
-            model: {
-              type: "string",
-              description: "Configured model name to run, such as gpt-5.5 or gpt-5.4-pro.",
-            },
-            input: {
-              type: "string",
-              description: "Prompt or instruction to send to the Responses API.",
-            },
-            instructions: {
-              type: "string",
-              description: "Optional system-style instructions for the response.",
-            },
-            max_output_tokens: {
-              type: "number",
-              minimum: 1,
-              description: "Maximum number of output tokens to generate.",
-            },
+    ...(env.x402EnableBazaar
+      ? {
+          extensions: {
+            ...declareDiscoveryExtension({
+              input: {
+                model: env.openaiModel,
+                input:
+                  "Extract the three most important market-moving events from this note and return a concise agent-ready summary.",
+                instructions: "Return plain text with one short line per event.",
+                max_output_tokens: 256,
+              },
+              inputSchema: {
+                properties: {
+                  model: {
+                    type: "string",
+                    description: "Configured model name to run, such as gpt-5.5 or gpt-5.4-pro.",
+                  },
+                  input: {
+                    type: "string",
+                    description: "Prompt or instruction to send to the Responses API.",
+                  },
+                  instructions: {
+                    type: "string",
+                    description: "Optional system-style instructions for the response.",
+                  },
+                  max_output_tokens: {
+                    type: "number",
+                    minimum: 1,
+                    description: "Maximum number of output tokens to generate.",
+                  },
+                },
+                required: ["input"],
+              },
+              bodyType: "json",
+              output: {
+                example: {
+                  output_text:
+                    "1. Softer inflation data lifted US equities at the open.\n2. Treasury yields eased across the curve.\n3. Mega-cap tech outperformed on AI infrastructure demand.",
+                  tokens_spent: 190,
+                  cost_usd: 0.001,
+                },
+              },
+            }),
           },
-          required: ["input"],
-        },
-        bodyType: "json",
-        output: {
-          example: {
-            output_text:
-              "1. Softer inflation data lifted US equities at the open.\n2. Treasury yields eased across the curve.\n3. Mega-cap tech outperformed on AI infrastructure demand.",
-            tokens_spent: 190,
-            cost_usd: 0.001,
-          },
-        },
-      }),
-    },
+        }
+      : {}),
   };
 }
 
@@ -377,84 +381,93 @@ function createChatCompletionsRouteConfig(): RouteConfig {
     mimeType: "application/json",
     unpaidResponseBody: createUnpaidResponseBody,
     settlementFailedResponseBody: createSettlementFailedResponseBody,
-    extensions: {
-      ...declareDiscoveryExtension({
-        input: {
-          model: env.openaiModel,
-          messages: [
-            { role: "system", content: "You are a concise finance assistant." },
-            {
-              role: "user",
-              content: "Explain what the yield curve is and why an inversion matters for markets.",
-            },
-          ],
-          max_tokens: 180,
-        },
-        inputSchema: {
-          properties: {
-            model: {
-              type: "string",
-              description: "Configured model name to run, such as gpt-5.5 or gpt-5.4.",
-            },
-            messages: {
-              type: "array",
-              description: "OpenAI-compatible chat message list.",
-              minItems: 1,
-              items: {
-                type: "object",
+    ...(env.x402EnableBazaar
+      ? {
+          extensions: {
+            ...declareDiscoveryExtension({
+              input: {
+                model: env.openaiModel,
+                messages: [
+                  { role: "system", content: "You are a concise finance assistant." },
+                  {
+                    role: "user",
+                    content: "Explain what the yield curve is and why an inversion matters for markets.",
+                  },
+                ],
+                max_tokens: 180,
+              },
+              inputSchema: {
                 properties: {
-                  role: {
+                  model: {
                     type: "string",
-                    enum: ["system", "user", "assistant", "developer"],
+                    description: "Configured model name to run, such as gpt-5.5 or gpt-5.4.",
                   },
-                  content: {
-                    type: "string",
+                  messages: {
+                    type: "array",
+                    description: "OpenAI-compatible chat message list.",
+                    minItems: 1,
+                    items: {
+                      type: "object",
+                      properties: {
+                        role: {
+                          type: "string",
+                          enum: ["system", "user", "assistant", "developer"],
+                        },
+                        content: {
+                          type: "string",
+                        },
+                      },
+                      required: ["role", "content"],
+                      additionalProperties: false,
+                    },
+                  },
+                  max_tokens: {
+                    type: "number",
+                    minimum: 1,
+                    description: "Maximum number of completion tokens to generate.",
                   },
                 },
-                required: ["role", "content"],
-                additionalProperties: false,
+                required: ["messages"],
               },
-            },
-            max_tokens: {
-              type: "number",
-              minimum: 1,
-              description: "Maximum number of completion tokens to generate.",
-            },
-          },
-          required: ["messages"],
-        },
-        bodyType: "json",
-        output: {
-          example: {
-            id: "chatcmpl_demo",
-            object: "chat.completion",
-            created: 1735689600,
-            model: env.openaiModel,
-            choices: [
-              {
-                index: 0,
-                message: {
-                  role: "assistant",
-                  content:
-                    "The yield curve plots bond yields across maturities, and an inversion matters because it can signal tighter financial conditions and rising recession risk expectations.",
+              bodyType: "json",
+              output: {
+                example: {
+                  id: "chatcmpl_demo",
+                  object: "chat.completion",
+                  created: 1735689600,
+                  model: env.openaiModel,
+                  choices: [
+                    {
+                      index: 0,
+                      message: {
+                        role: "assistant",
+                        content:
+                          "The yield curve plots bond yields across maturities, and an inversion matters because it can signal tighter financial conditions and rising recession risk expectations.",
+                      },
+                      finish_reason: "stop",
+                    },
+                  ],
+                  tokens_spent: 154,
+                  cost_usd: 0.001,
                 },
-                finish_reason: "stop",
               },
-            ],
-            tokens_spent: 154,
-            cost_usd: 0.001,
+            }),
           },
-        },
-      }),
-    },
+        }
+      : {}),
   };
 }
 
 export function createInferencePaymentMiddleware() {
   const facilitatorClient = createFacilitatorClient();
-  const resourceServer = new x402ResourceServer(facilitatorClient)
-    .register(env.x402Network as `${string}:${string}`, new UptoEvmScheme())
-    .registerExtension(bazaarResourceServerExtension);
+  const resourceServer = new x402ResourceServer(facilitatorClient).register(
+    env.x402Network as `${string}:${string}`,
+    new UptoEvmScheme(),
+  );
+
+  if (env.x402EnableBazaar) {
+    resourceServer.registerExtension(bazaarResourceServerExtension);
+  }
 
   const routes = {
     "POST /v1/responses": createResponsesRouteConfig(),
