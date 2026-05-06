@@ -107,6 +107,28 @@ npm run build
 npm start
 ```
 
+Run under PM2:
+
+```bash
+npm run pm2:start
+npm run pm2:status
+npm run pm2:logs
+```
+
+Common PM2 management commands:
+
+```bash
+npm run pm2:restart
+npm run pm2:reload
+npm run pm2:stop
+npm run pm2:delete
+```
+
+PM2 uses [ecosystem.config.cjs](/e:/bizwax/Testing/ai-model/ecosystem.config.cjs) and writes process logs to:
+
+- [server.log](/e:/bizwax/Testing/ai-model/server.log)
+- [server.err.log](/e:/bizwax/Testing/ai-model/server.err.log)
+
 ## Paid endpoints
 
 ### `POST /v1/chat/completions`

@@ -9,10 +9,15 @@
     "clean": "rimraf dist",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
+    "pm2:start": "npm run build && pm2 start ecosystem.config.cjs --only api-zeno-finance",
+    "pm2:restart": "pm2 restart api-zeno-finance",
+    "pm2:reload": "pm2 reload api-zeno-finance",
+    "pm2:stop": "pm2 stop api-zeno-finance",
+    "pm2:delete": "pm2 delete api-zeno-finance",
+    "pm2:logs": "pm2 logs api-zeno-finance",
+    "pm2:status": "pm2 status api-zeno-finance",
     "approve:permit2": "tsx scripts/approve-permit2.ts",
-    "test:buyer": "tsx scripts/test-buyer.ts",
-    "check:venice": "tsx scripts/check-venice-models.ts",
-    "check:venice:chat": "tsx scripts/check-venice-chat.ts"
+    "test:buyer": "tsx scripts/test-buyer.ts"
   },
   "keywords": [
     "x402",
@@ -37,6 +42,7 @@
   "devDependencies": {
     "@types/express": "latest",
     "@types/node": "latest",
+    "pm2": "^5.4.3",
     "rimraf": "latest",
     "tsx": "latest",
     "typescript": "latest"
