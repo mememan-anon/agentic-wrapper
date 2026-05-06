@@ -31,11 +31,18 @@ export type ModelPricing = {
   };
 };
 
+export type ModelDescriptor = {
+  id: string;
+  tier: "default" | "budget" | "premium";
+  bestFor: string[];
+  outputStyle: string;
+};
+
 const DEFAULT_MAX_OUTPUT_TOKENS = 512;
 const INPUT_TOKEN_BUFFER = 100;
 const INPUT_TOKEN_MULTIPLIER = 1.25;
 const MINIMUM_CHARGE_USD = 0.001;
-const MAXIMUM_CHARGE_USD = 10;
+const MAXIMUM_CHARGE_USD = 6;
 
 const knownPricingBasis: Record<string, PricingBasis> = {
   "gpt-5.5": {
@@ -60,6 +67,27 @@ const knownPricingBasis: Record<string, PricingBasis> = {
     assumedInputTokens: 1000,
     assumedOutputTokens: 300,
     markupMultiplier: 1,
+  },
+};
+
+const knownModelDescriptors: Record<string, ModelDescriptor> = {
+  "gpt-5.5": {
+    id: "gpt-5.5",
+    tier: "default",
+    bestFor: ["general reasoning", "summaries", "agent workflows", "structured generation"],
+    outputStyle: "Balanced quality and cost for most agent tasks.",
+  },
+  "gpt-5.4": {
+    id: "gpt-5.4",
+    tier: "budget",
+    bestFor: ["short prompts", "basic extraction", "low-cost automation"],
+    outputStyle: "Lowest-cost option for lighter requests.",
+  },
+  "gpt-5.4-pro": {
+    id: "gpt-5.4-pro",
+    tier: "premium",
+    bestFor: ["harder reasoning", "higher-stakes drafting", "premium agent tasks"],
+    outputStyle: "Highest-end option for more demanding prompts.",
   },
 };
 
@@ -235,13 +263,25 @@ export function getModelPricing(model: string): ModelPricing {
 
   return {
     model: normalizedModel,
-    priceUsd: clampChargeUsd(env.prepaidRequestCostUsd),
+    priceUsd: clampChargeUsd(env.fallbackRequestCostUsd),
     source: "fallback",
   };
 }
 
 export function listAvailableModelPricing(): ModelPricing[] {
   return env.openaiModels.map((model) => getModelPricing(model));
+}
+
+export function getModelDescriptor(model: string): ModelDescriptor {
+  const normalizedModel = normalizeModel(model);
+  return (
+    knownModelDescriptors[normalizedModel] || {
+      id: normalizedModel,
+      tier: normalizedModel === env.openaiModel ? "default" : "budget",
+      bestFor: ["general inference"],
+      outputStyle: "Configured OpenAI-compatible model.",
+    }
+  );
 }
 
 export function getHighestEstimatedPriceUsd(): number {

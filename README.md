@@ -19,8 +19,6 @@ This means buyers do **not** need your provider key. They need a wallet. The ser
 - [src/routes/generate.ts](/e:/bizwax/Testing/ai-model/src/routes/generate.ts) implements the paid OpenAI-compatible endpoints
 - [src/config/env.ts](/e:/bizwax/Testing/ai-model/src/config/env.ts) loads and validates environment variables
 - [scripts/test-buyer.ts](/e:/bizwax/Testing/ai-model/scripts/test-buyer.ts) runs the local buyer retry flow against this server
-- [scripts/check-venice-models.ts](/e:/bizwax/Testing/ai-model/scripts/check-venice-models.ts) checks Venice models directly
-- [scripts/check-venice-chat.ts](/e:/bizwax/Testing/ai-model/scripts/check-venice-chat.ts) calls Venice chat directly with `VENICE_API_KEY`
 
 ## How the payment flow works
 

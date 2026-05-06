@@ -9,3 +9,5 @@ pnpm-debug.log*
 .DS_Store
 coverage/
 dist
+server.log
+server.err.log

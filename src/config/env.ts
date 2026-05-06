@@ -25,11 +25,6 @@ function requireEnv(keys: string[], label: string): string {
   return value;
 }
 
-function normalizePrice(price: string): string {
-  const value = price.trim();
-  return value.startsWith("$") ? value : `$${value}`;
-}
-
 function normalizeBaseUrl(url: string): string {
   return url.replace(/\/+$/, "");
 }
@@ -102,7 +97,6 @@ export interface AppEnv {
   payToAddress: string;
   x402Network: string;
   x402FacilitatorUrl: string;
-  x402PriceUsd: string;
   openaiBaseUrl: string;
   openaiApiKey: string;
   openaiModel: string;
@@ -111,10 +105,7 @@ export interface AppEnv {
   systemPrompt: string;
   cdpApiKeyId: string;
   cdpApiKeySecret: string;
-  prepaidMinimumBalanceUsd: number;
-  prepaidSuggestedTopUpUsd: number;
-  prepaidMinimumTopUpUsd: number;
-  prepaidRequestCostUsd: number;
+  fallbackRequestCostUsd: number;
 }
 
 export const env: AppEnv = {
@@ -123,7 +114,6 @@ export const env: AppEnv = {
   payToAddress: requireEnv(["PAY_TO_ADDRESS", "WALLET", "wallet"], "receiving wallet address"),
   x402Network: readFirstDefined(["X402_NETWORK"], "eip155:8453"),
   x402FacilitatorUrl: readFirstDefined(["X402_FACILITATOR_URL"], "https://api.cdp.coinbase.com/platform/v2/x402"),
-  x402PriceUsd: normalizePrice(readFirstDefined(["X402_PRICE_USD"], "$0.01")),
   openaiBaseUrl: normalizeBaseUrl(
     readFirstDefined(["OPENAI_BASE_URL", "AZURE_OPENAI_ENDPOINT"], "https://api.openai.com/v1"),
   ),
@@ -143,10 +133,10 @@ export const env: AppEnv = {
   ),
   cdpApiKeyId: readFirstDefined(["CDP_API_KEY_ID"], ""),
   cdpApiKeySecret: readFirstDefined(["CDP_API_KEY_SECRET"], ""),
-  prepaidMinimumBalanceUsd: readPositiveNumber(["PREPAID_MINIMUM_BALANCE_USD"], 0.01),
-  prepaidSuggestedTopUpUsd: readPositiveNumber(["PREPAID_SUGGESTED_TOP_UP_USD"], 5),
-  prepaidMinimumTopUpUsd: readPositiveNumber(["PREPAID_MINIMUM_TOP_UP_USD"], 1),
-  prepaidRequestCostUsd: readPositiveNumber(["PREPAID_REQUEST_COST_USD"], 0.1),
+  fallbackRequestCostUsd: readPositiveNumber(
+    ["X402_FALLBACK_PRICE_USD", "REQUEST_COST_USD", "PREPAID_REQUEST_COST_USD"],
+    0.1,
+  ),
 };
 
 env.openaiModels = Array.from(
