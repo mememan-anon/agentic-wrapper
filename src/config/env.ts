@@ -134,7 +134,7 @@ export const env: AppEnv = {
   cdpApiKeyId: readFirstDefined(["CDP_API_KEY_ID"], ""),
   cdpApiKeySecret: readFirstDefined(["CDP_API_KEY_SECRET"], ""),
   fallbackRequestCostUsd: readPositiveNumber(
-    ["X402_FALLBACK_PRICE_USD", "REQUEST_COST_USD", "PREPAID_REQUEST_COST_USD"],
+    ["X402_FALLBACK_PRICE_USD", "REQUEST_COST_USD"],
     0.1,
   ),
 };
